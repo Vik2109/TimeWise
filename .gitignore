@@ -1,0 +1,20 @@
+# Prevents your real env files with secrets from being pushed
+.env
+.env.*
+.env.local
+
+# Prevents node_modules from being pushed (restored via npm install)
+node_modules/
+
+# Prevents build output from being pushed
+dist/
+build/
+client/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log

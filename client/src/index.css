@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Custom scrollbar ────────────────────────────────────────── */
+@layer base {
+  ::-webkit-scrollbar          { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track    { background: transparent; }
+  ::-webkit-scrollbar-thumb    { @apply bg-surface-200 rounded; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-surface-300; }
+
+  * { -webkit-font-smoothing: antialiased; }
+
+  input[type=range] {
+    @apply w-full h-1.5 bg-surface-200 rounded-full appearance-none cursor-pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    @apply appearance-none w-4 h-4 rounded-full bg-primary-400 cursor-pointer;
+  }
+}
+
+/* ── Component layer ─────────────────────────────────────────── */
+@layer components {
+  /* Cards */
+  .card         { @apply bg-surface-50 border border-white/[0.07] rounded-2xl p-5; }
+  .card-sm      { @apply bg-surface-50 border border-white/[0.07] rounded-xl p-4; }
+
+  /* Buttons */
+  .btn          { @apply inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all duration-150 border-0 outline-none font-sans disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap; }
+  .btn-primary  { @apply bg-primary-400 text-white hover:bg-primary-300; }
+  .btn-ghost    { @apply bg-surface-100 text-white border border-white/[0.07] hover:border-white/[0.12] hover:bg-surface-200; }
+  .btn-danger   { @apply bg-coral-300/10 text-coral-300 border border-coral-300/20 hover:bg-coral-300/20; }
+  .btn-sm       { @apply px-2.5 py-1.5 text-xs; }
+  .btn-lg       { @apply px-5 py-3 text-base; }
+  .btn-full     { @apply w-full justify-center py-3 text-base rounded-xl; }
+
+  /* Icon buttons */
+  .icon-btn     { @apply w-9 h-9 flex items-center justify-center rounded-lg bg-surface-100 border border-white/[0.07] cursor-pointer transition-all duration-150 hover:border-white/[0.12]; }
+  .icon-btn-danger { @apply hover:bg-coral-300/10 hover:border-coral-300/30; }
+
+  /* Form elements */
+  .input        { @apply w-full bg-surface-100 border border-white/[0.12] rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all duration-150 focus:border-primary-400 focus:ring-2 focus:ring-primary-400/15 font-sans; }
+  .label        { @apply block text-xs font-semibold text-white/50 uppercase tracking-wider mb-1.5; }
+  .input-error  { @apply border-coral-300 focus:border-coral-300 focus:ring-coral-300/15; }
+  .error-text   { @apply text-xs text-coral-300 mt-1; }
+
+  /* Navigation */
+  .nav-item     { @apply flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-white/50 cursor-pointer transition-all duration-150 hover:bg-surface-100 hover:text-white select-none; }
+  .nav-item.active { @apply bg-primary-400/15 text-primary-300; }
+  .nav-badge    { @apply ml-auto bg-primary-400 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full; }
+
+  /* Badges */
+  .badge        { @apply inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full; }
+  .badge-accent { @apply bg-primary-400/20 text-primary-300; }
+  .badge-green  { @apply bg-teal-300/15 text-teal-300; }
+  .badge-amber  { @apply bg-amber-300/15 text-amber-300; }
+  .badge-red    { @apply bg-coral-300/15 text-coral-300; }
+  .badge-gray   { @apply bg-surface-200 text-white/30; }
+
+  /* Tags */
+  .tag          { @apply text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide; }
+  .tag-Work     { @apply bg-primary-400/20 text-primary-300; }
+  .tag-Study    { @apply bg-teal-300/15 text-teal-300; }
+  .tag-Health   { @apply bg-amber-300/15 text-amber-300; }
+  .tag-Personal { @apply bg-blue-400/15 text-blue-400; }
+
+  /* Progress bars */
+  .progress-track { @apply h-1.5 bg-surface-200 rounded-full overflow-hidden; }
+  .progress-bar   { @apply h-full rounded-full transition-all duration-500; }
+  .progress-accent{ @apply bg-gradient-to-r from-primary-600 to-primary-300; }
+  .progress-teal  { @apply bg-gradient-to-r from-teal-600 to-teal-300; }
+  .progress-amber { @apply bg-gradient-to-r from-amber-600 to-amber-300; }
+  .progress-coral { @apply bg-gradient-to-r from-coral-600 to-coral-300; }
+
+  /* Stat cards */
+  .stat-card    { @apply bg-surface-50 border border-white/[0.07] rounded-2xl p-4 relative overflow-hidden; }
+  .stat-card::before { content: ''; @apply absolute top-0 left-0 right-0 h-0.5; }
+  .stat-accent::before { background: linear-gradient(90deg, #5B4DE0, #9B8DF5); }
+  .stat-teal::before   { background: linear-gradient(90deg, #0F6E56, #2CC9A0); }
+  .stat-amber::before  { background: linear-gradient(90deg, #C47D10, #F5A623); }
+  .stat-coral::before  { background: linear-gradient(90deg, #B03030, #F06464); }
+
+  /* Topbar */
+  .topbar       { @apply flex items-center justify-between px-4 sm:px-7 py-4 border-b border-white/[0.07] sticky top-0 z-10 backdrop-blur-md bg-surface-0/85; }
+
+  /* Mobile hamburger button */
+  .hamburger-btn { @apply lg:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-surface-100 border border-white/[0.07] cursor-pointer mr-3 shrink-0; }
+
+  /* Calendar */
+  .cal-day      { @apply aspect-square flex flex-col items-center justify-center rounded-lg text-sm cursor-pointer transition-colors duration-150; }
+  .cal-day:hover { @apply bg-surface-100; }
+  .cal-day.today { @apply bg-primary-400/20 text-primary-300 font-semibold; }
+  .cal-day.selected { @apply bg-primary-400 text-white; }
+  .cal-day.other-month { @apply text-white/20; }
+
+  /* Heatmap */
+  .hm-cell      { @apply aspect-square rounded-sm bg-surface-200 cursor-pointer transition-transform hover:scale-125; }
+  .hm-l1        { @apply bg-primary-400/20; }
+  .hm-l2        { @apply bg-primary-400/40; }
+  .hm-l3        { @apply bg-primary-400/65; }
+  .hm-l4        { @apply bg-primary-400; }
+
+  /* Toggle */
+  .toggle       { @apply w-10 h-[22px] bg-surface-200 rounded-full relative cursor-pointer transition-colors duration-200 border border-white/10 shrink-0; }
+  .toggle.on    { @apply bg-primary-400 border-primary-400; }
+  .toggle::after { content: ''; @apply absolute left-[3px] top-[2px] w-4 h-4 rounded-full bg-white/40 transition-all duration-200; }
+  .toggle.on::after { @apply translate-x-[18px] bg-white; }
+
+  /* Divider */
+  .divider      { @apply h-px bg-white/[0.07] my-4; }
+
+  /* Section */
+  .section-title { @apply text-[15px] font-semibold; }
+
+  /* Loading */
+  .spinner      { @apply border-2 border-surface-200 border-t-primary-400 rounded-full animate-spin; }
+
+  /* Page loading */
+  .page-load    { @apply flex flex-col items-center justify-center h-48 gap-3 text-white/30 text-sm; }
+
+  /* Empty */
+  .empty-state  { @apply flex flex-col items-center justify-center py-16 text-white/25; }
+
+  /* Pill */
+  .pill         { @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs text-white/40 border border-white/[0.07] bg-surface-100 cursor-pointer transition-all hover:border-primary-400 hover:text-primary-300; }
+  .pill.active  { @apply bg-primary-400/15 border-primary-400 text-primary-300; }
+
+  /* Event items */
+  .event-item   { @apply flex gap-3 p-3 bg-surface-100 rounded-xl mb-2 border-l-4 cursor-pointer transition-colors hover:bg-surface-200; }
+
+  /* Task item */
+  .task-row     { @apply flex items-start gap-3 py-3 px-2 border-b border-white/[0.07] cursor-pointer rounded-lg transition-colors hover:bg-surface-100; }
+  .task-row:last-child { @apply border-b-0; }
+
+  /* Habit row */
+  .habit-row    { @apply flex items-center gap-3 p-2 rounded-xl transition-colors hover:bg-surface-100; }
+
+  /* Notif item */
+  .notif-item   { @apply flex gap-3 p-3.5 bg-surface-100 border border-white/[0.07] rounded-xl mb-2 cursor-pointer transition-all hover:border-white/[0.12]; }
+  .notif-item.unread { @apply border-l-4 border-l-primary-400; }
+
+  /* Modal overlay */
+  .modal-overlay { @apply fixed inset-0 bg-black/65 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5 animate-fade-in; }
+  .modal-box     { @apply bg-surface-50 border border-white/[0.12] rounded-t-3xl sm:rounded-3xl p-5 sm:p-7 w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-y-auto relative animate-slide-up shadow-modal; }
+  .modal-title   { @apply text-lg font-semibold tracking-tight mb-5; }
+  .modal-actions { @apply flex gap-2.5 justify-end mt-5 pt-4 border-t border-white/[0.07]; }
+}
+
+/* ── Recharts overrides ──────────────────────────────────────── */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #1A1B22 !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  color: #F0F0F5 !important;
+}
+.recharts-cartesian-axis-tick-value { fill: rgba(255,255,255,0.3) !important; }
