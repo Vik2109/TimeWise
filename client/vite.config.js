@@ -28,19 +28,9 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom"],
-          charts: ["recharts"],
-          utils: ["axios", "date-fns"],
-        },
-      },
-    },
     chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
-    // ✅ future-safe (prevents some warnings)
-    include: ['react', 'react-dom'],
+    include: ["react", "react-dom"],
   },
 });
