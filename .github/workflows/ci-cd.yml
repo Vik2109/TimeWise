@@ -126,7 +126,7 @@ jobs:
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}")
 
-          if [[ "$STATUS" != "200" && "$STATUS" != "201" ]]; then
+          if [[ "$STATUS" != "200" && "$STATUS" != "201" && "$STATUS" != "202" ]]; then
             echo "❌ Deploy failed with status $STATUS"
             exit 1
           fi
