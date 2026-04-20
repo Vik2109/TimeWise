@@ -85,6 +85,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Debug
+        run: |
+          echo "Username: '${{ secrets.DOCKERHUB_USERNAME }}'"
+          echo "Token length: ${#DOCKERHUB_TOKEN}"
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract metadata
         id: meta
