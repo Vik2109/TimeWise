@@ -241,6 +241,7 @@ router.get(
   passport.authenticate("google", {
     scope: ["profile", "email"],
     state: "login",
+    session: false,
   }),
 );
 
@@ -250,6 +251,7 @@ router.get(
   passport.authenticate("google", {
     scope: ["profile", "email"],
     state: "register",
+    session: false,
   }),
 );
 
