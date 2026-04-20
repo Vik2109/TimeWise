@@ -64,17 +64,17 @@ app.use(
 );
 
 const passport = require("passport");
-const session = require('express-session')
+// const session = require('express-session')
 
 // ── Body / compression / sanitize ────────────────────────────
-app.use(session({
-  secret: process.env.JWT_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false } // set to true in production with HTTPS
-}));
+// app.use(session({
+//   secret: process.env.JWT_SECRET,
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: { secure: false } // set to true in production with HTTPS
+// }));
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(compression());
