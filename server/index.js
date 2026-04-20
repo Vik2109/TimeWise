@@ -133,6 +133,8 @@ app.use("/api/pomodoro", require("./routes/pomodoro"));
 app.use("/api/analytics", require("./routes/analytics"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/export", require("./routes/export"));
+app.use('/api/feedback', require('./routes/feedback'));
+
 
 // ── Health check ──────────────────────────────────────────────
 app.get("/api/health", (req, res) => {

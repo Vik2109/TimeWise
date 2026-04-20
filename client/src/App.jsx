@@ -20,6 +20,7 @@ const Profile      = lazy(() => import('./pages/Profile'))
 const ForgotPassword     = lazy(() => import('./pages/ForgotPassword'))
 const ResetPassword      = lazy(() => import('./pages/ResetPassword'))
 const AuthCallback = lazy(() => import('./pages/AuthCallback'))
+const Feedback     = lazy(() => import('./pages/Feedback'))
 
 const Loader = () => (
   <div className="flex items-center justify-center h-[60vh]">
@@ -55,6 +56,7 @@ export default function App() {
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="export"        element={<Export />} />
                 <Route path="profile"       element={<Profile />} />
+                <Route path="feedback"      element={<Feedback />} />
               </Route>
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>

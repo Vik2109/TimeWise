@@ -33,6 +33,7 @@ const NAV = [
         notif: true,
       },
       { to: "/export", icon: "download", label: "Export Data" },
+      { to: "/feedback", icon: "info", label: "Feedback" },
     ],
   },
 ];

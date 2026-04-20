@@ -316,6 +316,34 @@ const sendOverdueTask = async (user, task) => {
   });
 };
 
+// ── Feedback notification (to admin/owner) ───────────────────
+const sendFeedbackEmail = (user, feedback) => {
+  const stars = '★'.repeat(feedback.rating) + '☆'.repeat(5 - feedback.rating);
+  return sendEmail({
+    to: process.env.SMTP_USER, // send to yourself
+    subject: `[TimeWise Feedback] ${stars} — ${feedback.category}`,
+    html: baseTemplate(`
+      <h1>New Feedback Received</h1>
+      <p>A user has submitted feedback on TimeWise.</p>
+      <div class="divider"></div>
+
+      <p><strong style="color:#F0F0F5">From:</strong> <span class="highlight">${user.firstName} ${user.lastName}</span> (${user.email})</p>
+      <p><strong style="color:#F0F0F5">Category:</strong> ${feedback.category}</p>
+      <p><strong style="color:#F0F0F5">Rating:</strong> <span style="color:#F5A623;font-size:18px">${stars}</span> (${feedback.rating}/5)</p>
+
+      <div class="divider"></div>
+
+      <p><strong style="color:#F0F0F5">Message:</strong></p>
+      <div style="background:#1A1B22;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:16px;margin-top:8px;">
+        <p style="color:#D0D0E0;margin:0;line-height:1.7">${feedback.message}</p>
+      </div>
+
+      <div class="divider"></div>
+      <p style="font-size:12px;color:#5A5A72">Submitted on ${new Date(feedback.createdAt).toLocaleString()}</p>
+    `),
+  });
+};
+
 module.exports = {
   sendEmail,
   sendWelcomeEmail,
@@ -327,4 +355,5 @@ module.exports = {
   sendPomoNotif,
   sendCalendarReminder,
   sendOverdueTask,
+  sendFeedbackEmail,
 };
