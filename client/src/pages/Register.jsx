@@ -217,7 +217,7 @@ export default function Register() {
           <button
             onClick={() =>
               (window.location.href =
-                "http://localhost:5000/api/auth/google/register")
+                "/api/auth/google")
             }
             className="btn btn-ghost w-full justify-center gap-3 mb-2"
           >
