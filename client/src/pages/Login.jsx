@@ -168,7 +168,7 @@ export default function Login() {
           <button
             onClick={() =>
               (window.location.href =
-                "/api/auth/google?state=login")
+                "/api/auth/google/login")
             }
             className="btn btn-ghost w-full justify-center gap-3 mb-2"
           >
