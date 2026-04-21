@@ -91,7 +91,6 @@ export default function Pomodoro() {
   const currentCycle = Math.floor(effectiveSessions / 4) + 1;
 
   const onComplete = useCallback(async () => {
-    localStorage.removeItem('tw_pomo_session');  // ← add this
     const sid = sessionIdRef.current;
     const m = modeRef.current;
     if (sid) {
@@ -116,10 +115,8 @@ export default function Pomodoro() {
       .catch(() => {});
   }, []);
 
-  const isRestoringRef = useRef(false);
 
   useEffect(() => {
-    if (isRestoringRef.current) return;
     setRemaining(getDur(mode));
     setRunning(false);
     clearInterval(intervalRef.current);
@@ -142,40 +139,6 @@ export default function Pomodoro() {
     return () => clearInterval(intervalRef.current);
   }, [running, onComplete]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("tw_pomo_session");
-    if (!saved) return;
-
-    try {
-      const {
-        sessionId: sid,
-        mode: savedMode,
-        startedAt,
-        duration,
-      } = JSON.parse(saved);
-      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      const remaining = duration - elapsed;
-
-      if (remaining > 0) {
-        isRestoringRef.current = true;
-        setMode(savedMode);
-        setRemaining(remaining);
-        setSessionId(sid);
-        sessionIdRef.current = sid;
-        setRunning(true);
-        setTimeout(() => {
-        isRestoringRef.current = false;
-      }, 100);
-      } else {
-        localStorage.removeItem("tw_pomo_session");
-        if (sid) {
-          api.patch(`/pomodoro/${sid}/complete`).catch(() => {});
-        }
-      }
-    } catch {
-      localStorage.removeItem("tw_pomo_session");
-    }
-  }, []); // ← runs only on mount
 
   const handleStart = async () => {
     try {
@@ -186,23 +149,11 @@ export default function Pomodoro() {
       const id = res.data.data._id;
       setSessionId(id);
       sessionIdRef.current = id;
-
-      // ← Save to localStorage
-      localStorage.setItem(
-        "tw_pomo_session",
-        JSON.stringify({
-          sessionId: id,
-          mode,
-          startedAt: Date.now(),
-          duration: getDur(mode),
-        }),
-      );
     } catch {}
     setRunning(true);
   };
 
   const handleReset = () => {
-     localStorage.removeItem('tw_pomo_session');  // ← add this
     setRunning(false);
     setRemaining(getDur(mode));
     clearInterval(intervalRef.current);
