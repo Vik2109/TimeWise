@@ -116,7 +116,10 @@ export default function Pomodoro() {
       .catch(() => {});
   }, []);
 
+  const isRestoringRef = useRef(false);
+
   useEffect(() => {
+    if (isRestoringRef.current) return;
     setRemaining(getDur(mode));
     setRunning(false);
     clearInterval(intervalRef.current);
@@ -154,14 +157,16 @@ export default function Pomodoro() {
       const remaining = duration - elapsed;
 
       if (remaining > 0) {
-        // Session still active — restore it
+        isRestoringRef.current = true;
         setMode(savedMode);
         setRemaining(remaining);
         setSessionId(sid);
         sessionIdRef.current = sid;
         setRunning(true);
+        setTimeout(() => {
+        isRestoringRef.current = false;
+      }, 100);
       } else {
-        // Session already expired while away — complete it
         localStorage.removeItem("tw_pomo_session");
         if (sid) {
           api.patch(`/pomodoro/${sid}/complete`).catch(() => {});
