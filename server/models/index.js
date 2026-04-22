@@ -50,6 +50,7 @@ const pomodoroSchema = new mongoose.Schema({
   type:      { type: String, enum: ['focus', 'short_break', 'long_break'], default: 'focus' },
   duration:  { type: Number, required: true }, // minutes
   completed: { type: Boolean, default: false },
+  notified:  { type: Boolean, default: false },
   startedAt: { type: Date, default: Date.now },
   endedAt:   { type: Date },
   date:      { type: String }, // 'YYYY-MM-DD' for easy querying
