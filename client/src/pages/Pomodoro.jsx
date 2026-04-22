@@ -89,6 +89,7 @@ export default function Pomodoro() {
   const effectiveSessions = todayFocus + manualSession;
   const sessionInCycle = effectiveSessions % 4;
   const currentCycle = Math.floor(effectiveSessions / 4) + 1;
+  
 
   const onComplete = useCallback(async () => {
     const sid = sessionIdRef.current;
@@ -115,7 +116,6 @@ export default function Pomodoro() {
       .catch(() => {});
   }, []);
 
-
   useEffect(() => {
     setRemaining(getDur(mode));
     setRunning(false);
@@ -139,16 +139,18 @@ export default function Pomodoro() {
     return () => clearInterval(intervalRef.current);
   }, [running, onComplete]);
 
-
   const handleStart = async () => {
     try {
+      const typeMap = {
+        focus: "focus",
+        short: "short_break",
+        long: "long_break",
+      };
       const res = await api.post("/pomodoro", {
         type: typeMap[mode],
         duration: Math.round(getDur(mode) / 60),
       });
-      const id = res.data.data._id;
-      setSessionId(id);
-      sessionIdRef.current = id;
+      setSessionId(res.data.data._id);
     } catch {}
     setRunning(true);
   };
@@ -189,29 +191,15 @@ export default function Pomodoro() {
       <div className="topbar">
         <div className="flex items-center min-w-0">
           <button className="hamburger-btn" onClick={openSidebar}>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgba(255,255,255,0.6)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              className="w-4 h-4"
-            >
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" className="w-4 h-4">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
             </svg>
           </button>
           <div className="min-w-0">
-            <h1 className="text-xl font-semibold tracking-tight">
-              Pomodoro Timer
-            </h1>
+            <h1 className="text-xl font-semibold tracking-tight">Pomodoro Timer</h1>
             <p className="text-sm text-white/40 mt-0.5 hidden sm:block">
               {todayFocus} sessions today ·{" "}
-              {Math.round(
-                ((todayFocus * (settings.pomoDuration || 25)) / 60) * 10,
-              ) / 10}
-              h focused
+              {Math.round(((todayFocus * (settings.pomoDuration || 25)) / 60) * 10) / 10}h focused
             </p>
           </div>
         </div>
