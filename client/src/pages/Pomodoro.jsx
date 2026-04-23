@@ -8,9 +8,9 @@ import toast from "react-hot-toast";
 import clsx from "clsx";
 
 const MODES = [
-  { key: "focus", label: "🍅 Focus",       settingKey: "pomoDuration", def: 25, colorClass: "text-coral-300",   ring: "#F06464", bg: "bg-coral-300/10"   },
-  { key: "short", label: "☕ Short Break",  settingKey: "shortBreak",   def: 5,  colorClass: "text-teal-300",    ring: "#2CC9A0", bg: "bg-teal-300/10"    },
-  { key: "long",  label: "🌿 Long Break",   settingKey: "longBreak",    def: 15, colorClass: "text-primary-300", ring: "#7C6BF0", bg: "bg-primary-400/10" },
+  { key: "focus", label: "🍅 Focus",      settingKey: "pomoDuration", def: 25, colorClass: "text-coral-300",   ring: "#F06464", bg: "bg-coral-300/10"   },
+  { key: "short", label: "☕ Short Break", settingKey: "shortBreak",   def: 5,  colorClass: "text-teal-300",    ring: "#2CC9A0", bg: "bg-teal-300/10"    },
+  { key: "long",  label: "🌿 Long Break",  settingKey: "longBreak",    def: 15, colorClass: "text-primary-300", ring: "#7C6BF0", bg: "bg-primary-400/10" },
 ];
 
 const MODE_TO_TYPE = { focus: "focus", short: "short_break", long: "long_break" };
@@ -34,32 +34,54 @@ export default function Pomodoro() {
     return (localSettings[mode?.settingKey] || mode?.def || 25) * 60;
   }, [localSettings]);
 
-  const [mode,      setMode]      = useState("focus");
-  const [remaining, setRemaining] = useState(() => getDur("focus"));
-  const [running,   setRunning]   = useState(false);
-  const [sessions,  setSessions]  = useState([]);
-  const [sessionId, setSessionId] = useState(null);
+  // ── Initialise state from localStorage immediately ──────────
+  // This runs synchronously before first render so no flicker
+  const getInitialState = () => {
+    try {
+      const saved = localStorage.getItem("tw_pomo_session");
+      if (saved) {
+        const { sessionId, mode, startedAt, duration } = JSON.parse(saved);
+        const elapsed   = Math.floor((Date.now() - startedAt) / 1000);
+        const remaining = duration - elapsed;
+        if (remaining > 0) {
+          return { mode, remaining, running: true, sessionId };
+        }
+      }
+    } catch {}
+    return { mode: "focus", remaining: null, running: false, sessionId: null };
+  };
 
-  const intervalRef    = useRef(null);
-  const sessionIdRef   = useRef(null);
-  const modeRef        = useRef(mode);
-  const isRestoringRef = useRef(false);
+  const init = getInitialState();
+
+  const [mode,      setMode]      = useState(init.mode);
+  const [remaining, setRemaining] = useState(init.remaining ?? (() => getDur(init.mode)));
+  const [running,   setRunning]   = useState(init.running);
+  const [sessions,  setSessions]  = useState([]);
+  const [sessionId, setSessionId] = useState(init.sessionId);
+
+  const intervalRef  = useRef(null);
+  const sessionIdRef = useRef(init.sessionId);
+  const modeRef      = useRef(init.mode);
+  // Track whether an active session was present on mount
+  // If so, skip the first mode useEffect reset
+  const mountedWithSession = useRef(init.sessionId !== null);
 
   useEffect(() => { sessionIdRef.current = sessionId; }, [sessionId]);
   useEffect(() => { modeRef.current = mode; }, [mode]);
 
-  const currentMode      = MODES.find((m) => m.key === mode);
-  const total            = getDur(mode);
-  const progress         = 1 - remaining / total;
-  const C                = 2 * Math.PI * 95;
-  const offset           = C * (1 - progress);
-  const mins             = String(Math.floor(remaining / 60)).padStart(2, "0");
-  const secs             = String(remaining % 60).padStart(2, "0");
-  const todayFocus       = sessions.filter((s) => s.type === "focus" && s.completed).length;
+  const currentMode       = MODES.find((m) => m.key === mode);
+  const total             = getDur(mode);
+  const progress          = 1 - remaining / total;
+  const C                 = 2 * Math.PI * 95;
+  const offset            = C * (1 - progress);
+  const mins              = String(Math.floor(remaining / 60)).padStart(2, "0");
+  const secs              = String(remaining % 60).padStart(2, "0");
+  const todayFocus        = sessions.filter((s) => s.type === "focus" && s.completed).length;
   const effectiveSessions = todayFocus + manualSession;
-  const sessionInCycle   = effectiveSessions % 4;
-  const currentCycle     = Math.floor(effectiveSessions / 4) + 1;
+  const sessionInCycle    = effectiveSessions % 4;
+  const currentCycle      = Math.floor(effectiveSessions / 4) + 1;
 
+  // ── Fetch today's sessions ───────────────────────────────────
   const fetchSessions = useCallback(() => {
     const today = new Date().toISOString().split("T")[0];
     api.get(`/pomodoro?date=${today}`)
@@ -67,29 +89,25 @@ export default function Pomodoro() {
       .catch(() => {});
   }, []);
 
-  // Fetch sessions on mount
   useEffect(() => { fetchSessions(); }, [fetchSessions]);
 
-  // Restore active session from localStorage on mount
+  // ── Handle session expired while away ───────────────────────
   useEffect(() => {
     const saved = localStorage.getItem("tw_pomo_session");
     if (!saved) return;
     try {
-      const { sessionId: sid, mode: savedMode, startedAt, duration } = JSON.parse(saved);
+      const { sessionId: sid, startedAt, duration } = JSON.parse(saved);
       const elapsed   = Math.floor((Date.now() - startedAt) / 1000);
-      const rem       = duration - elapsed;
-      if (rem > 0) {
-        isRestoringRef.current = true;
-        setMode(savedMode);
-        setRemaining(rem);
-        setSessionId(sid);
-        sessionIdRef.current = sid;
-        setRunning(true);
-        setTimeout(() => { isRestoringRef.current = false; }, 100);
-      } else {
+      const remaining = duration - elapsed;
+      if (remaining <= 0) {
+        // Timer expired while away — complete it silently
         localStorage.removeItem("tw_pomo_session");
         if (sid) api.patch(`/pomodoro/${sid}/complete`).catch(() => {});
         fetchSessions();
+        setRunning(false);
+        setSessionId(null);
+        sessionIdRef.current = null;
+        setRemaining(getDur(mode));
       }
     } catch {
       localStorage.removeItem("tw_pomo_session");
@@ -97,14 +115,21 @@ export default function Pomodoro() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset timer on mode change — skip during restore
+  // ── Reset timer on mode change — skip if active session ─────
   useEffect(() => {
-    if (isRestoringRef.current) return;
+    // If we mounted with an active session, skip the very first run
+    if (mountedWithSession.current) {
+      mountedWithSession.current = false;
+      return;
+    }
+    // If there's an active session running, don't reset
+    if (sessionIdRef.current) return;
     setRemaining(getDur(mode));
     setRunning(false);
     clearInterval(intervalRef.current);
   }, [mode, getDur]);
 
+  // ── Session complete ─────────────────────────────────────────
   const onComplete = useCallback(async () => {
     localStorage.removeItem("tw_pomo_session");
     const sid = sessionIdRef.current;
@@ -118,6 +143,7 @@ export default function Pomodoro() {
     sessionIdRef.current = null;
   }, [fetchSessions]);
 
+  // ── Interval ticker ──────────────────────────────────────────
   useEffect(() => {
     if (running) {
       intervalRef.current = setInterval(() => {
@@ -137,6 +163,7 @@ export default function Pomodoro() {
     return () => clearInterval(intervalRef.current);
   }, [running, onComplete]);
 
+  // ── Start ────────────────────────────────────────────────────
   const handleStart = async () => {
     try {
       const res = await api.post("/pomodoro", {
@@ -157,13 +184,17 @@ export default function Pomodoro() {
     setRunning(true);
   };
 
+  // ── Reset ────────────────────────────────────────────────────
   const handleReset = () => {
     localStorage.removeItem("tw_pomo_session");
     setRunning(false);
+    setSessionId(null);
+    sessionIdRef.current = null;
     setRemaining(getDur(mode));
     clearInterval(intervalRef.current);
   };
 
+  // ── Click active session to restore timer ────────────────────
   const handleSessionClick = (s) => {
     if (s.completed) return;
     const saved = localStorage.getItem("tw_pomo_session");
@@ -174,16 +205,16 @@ export default function Pomodoro() {
       const elapsed = Math.floor((Date.now() - startedAt) / 1000);
       const rem     = duration - elapsed;
       if (rem <= 0) return;
-      isRestoringRef.current = true;
+      mountedWithSession.current = true; // prevent mode useEffect reset
       setMode(savedMode);
       setRemaining(rem);
       setSessionId(sid);
       sessionIdRef.current = sid;
       setRunning(true);
-      setTimeout(() => { isRestoringRef.current = false; }, 100);
     } catch {}
   };
 
+  // ── Settings ─────────────────────────────────────────────────
   const handleSettingChange = (key, value) => {
     setLocalSettings((p) => ({ ...p, [key]: Number(value) }));
     const modeKey = { pomoDuration: "focus", shortBreak: "short", longBreak: "long" };
