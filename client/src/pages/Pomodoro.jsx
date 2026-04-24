@@ -136,9 +136,9 @@ export default function Pomodoro() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+  // useEffect(() => {
+  //   fetchSessions();
+  // }, [fetchSessions]);
 
   // ── Handle session expired while away ───────────────────────
   useEffect(() => {
