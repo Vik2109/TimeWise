@@ -71,40 +71,17 @@ export default function Pomodoro() {
     [localSettings],
   );
 
-  // ── Initialise state from localStorage immediately ──────────
-  // This runs synchronously before first render so no flicker
-  const getInitialState = () => {
-    try {
-      const saved = localStorage.getItem("tw_pomo_session");
-      if (saved) {
-        const { sessionId, mode, startedAt, duration } = JSON.parse(saved);
-        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-        const remaining = duration - elapsed;
-        if (remaining > 0) {
-          return { mode, remaining, running: true, sessionId };
-        }
-      }
-    } catch {}
-    return { mode: "focus", remaining: null, running: false, sessionId: null };
-  };
-
-  const init = getInitialState();
-
-  const [mode, setMode] = useState(init.mode);
-  const [remaining, setRemaining] = useState(
-    init.remaining ?? (() => getDur(init.mode)),
-  );
-  const [running, setRunning] = useState(init.running);
+  const [mode, setMode] = useState("focus");
+  const [remaining, setRemaining] = useState(() => getDur("focus"));
+  const [running, setRunning] = useState(false);
   const [sessions, setSessions] = useState([]);
-  const [sessionId, setSessionId] = useState(init.sessionId);
+  const [sessionId, setSessionId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const intervalRef = useRef(null);
-  const sessionIdRef = useRef(init.sessionId);
-  const modeRef = useRef(init.mode);
-  // Track whether an active session was present on mount
-  // If so, skip the first mode useEffect reset
-  const mountedWithSession = useRef(init.sessionId !== null);
+  const sessionIdRef = useRef(null);
+  const modeRef = useRef("focus");
+  const skipModeResetRef = useRef(false);
 
   useEffect(() => {
     sessionIdRef.current = sessionId;
@@ -175,12 +152,10 @@ export default function Pomodoro() {
 
   // ── Reset timer on mode change — skip if active session ─────
   useEffect(() => {
-    // If we mounted with an active session, skip the very first run
-    if (mountedWithSession.current) {
-      mountedWithSession.current = false;
+    if (skipModeResetRef.current) {
+      skipModeResetRef.current = false;
       return;
     }
-    // If there's an active session running, don't reset
     if (sessionIdRef.current) return;
     setRemaining(getDur(mode));
     setRunning(false);
