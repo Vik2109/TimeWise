@@ -134,8 +134,10 @@ const calendarReminderJob = cron.schedule(
       const now = new Date();
 
       // Get all upcoming events in the next 25 hours
-      const todayStr = now.toISOString().split("T")[0];
-      const tomorrowStr = new Date(now.getTime() + 25 * 60 * 60 * 1000)
+      const IST_OFFSET = 330 * 60 * 1000;
+      const nowIST = new Date(now.getTime() + IST_OFFSET);
+      const todayStr = nowIST.toISOString().split("T")[0];
+      const tomorrowStr = new Date(nowIST.getTime() + 25 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0];
 
@@ -149,7 +151,9 @@ const calendarReminderJob = cron.schedule(
         if (!u.notifications?.calendar) continue;
 
         // Build event start datetime
-        const eventStart = new Date(`${event.date}T${event.startTime}:00`);
+        const eventStart = new Date(
+          `${event.date}T${event.startTime}:00+05:30`,
+        );
         const diffMin = Math.round((eventStart - now) / 60000);
         logger.info(
           `📅 Event: "${event.title}" diffMin=${diffMin} date=${event.date} startTime=${event.startTime}`,
