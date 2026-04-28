@@ -149,9 +149,11 @@ const calendarReminderJob = cron.schedule(
         if (!u.notifications?.calendar) continue;
 
         // Build event start datetime
-        const [h, m] = event.startTime.split(":").map(Number);
         const eventStart = new Date(`${event.date}T${event.startTime}:00`);
         const diffMin = Math.round((eventStart - now) / 60000);
+        logger.info(
+          `📅 Event: "${event.title}" diffMin=${diffMin} date=${event.date} startTime=${event.startTime}`,
+        );
 
         const checks = [
           { key: "oneDayBefore", min: 1440, label: "1 day", mins: 1440 },
