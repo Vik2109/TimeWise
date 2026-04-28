@@ -87,7 +87,7 @@ export default function Feedback() {
 
   useEffect(() => {
     api.get('/feedback/mine')
-      .then(data => setHistory(data.feedbacks || []))
+      .then(data => setHistory(res.data.feedbacks || []))
       .catch(() => {})
       .finally(() => setLoadingHistory(false))
   }, [success])
